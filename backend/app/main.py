@@ -14,6 +14,7 @@ from app.models.report import Report
 
 from app.routers import patient
 from app.routers import doctor
+from app.routers import visit
 
 
 print(Base.metadata.tables.keys())
@@ -26,6 +27,9 @@ app = FastAPI(
 )
 app.include_router(patient.router)
 app.include_router(doctor.router)
+app.include_router(doctor.router)
+app.include_router(patient.router)
+app.include_router(visit.router)
 
 
 @app.get("/")

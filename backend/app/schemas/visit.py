@@ -9,7 +9,7 @@ class VisitBase(BaseModel):
 
 
 class VisitCreate(VisitBase):
-    pass
+    patient_id: int
 
 
 class VisitUpdate(BaseModel):
