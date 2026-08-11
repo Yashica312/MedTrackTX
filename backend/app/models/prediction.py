@@ -44,7 +44,7 @@ class Prediction(Base):
     )
 
     abcde_analysis = relationship(
-    "ABCDE",
+    "Abcde_Score",
     back_populates="prediction",
     uselist=False,
     cascade="all, delete"

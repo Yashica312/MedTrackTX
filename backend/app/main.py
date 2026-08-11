@@ -8,14 +8,22 @@ from app.models.patient import Patient
 from app.models.visit import Visit
 from app.models.lesion_image import LesionImage
 from app.models.prediction import Prediction
-from app.models.abcde import ABCDE
+from app.models.abcde_score import Abcde_Score
 from app.models.temporal_analysis import TemporalAnalysis
 from app.models.report import Report
+from fastapi.staticfiles import StaticFiles
 
 from app.routers import patient
 from app.routers import doctor
 from app.routers import visit
-
+from app.routers import lesion_image
+from app.routers import prediction
+from app.routers import segmentation
+from app.routers import segmentation
+from app.routers import explainability
+from app.routers import abcde
+from app.routers import temporal_analysis
+from app.routers import analysis
 
 print(Base.metadata.tables.keys())
 Base.metadata.create_all(bind=engine)
@@ -30,8 +38,27 @@ app.include_router(doctor.router)
 app.include_router(doctor.router)
 app.include_router(patient.router)
 app.include_router(visit.router)
+app.include_router(lesion_image.router)
+app.include_router(prediction.router)
+app.include_router(explainability.router)
+app.include_router(
+    abcde.router
+)
+app.include_router(
+    temporal_analysis.router
+)
+app.include_router(
+    analysis.router
+)
+
 
 
 @app.get("/")
 def root():
-    return {"message": "Welcome to MedTrackTX Backend 🚀"}
+    return {"message": "Welcome to MedTrackTX Backend..."}
+
+app.mount(
+    "/uploads",
+    StaticFiles(directory="app/uploads"),
+    name="uploads"
+)

@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship
 from app.database import Base
 
 
-class ABCDE(Base):
+class Abcde_Score(Base):
     __tablename__ = "abcde_analysis"
 
     id = Column(Integer, primary_key=True, index=True)
