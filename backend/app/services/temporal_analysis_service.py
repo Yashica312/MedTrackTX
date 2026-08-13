@@ -2,14 +2,25 @@ import cv2
 import numpy as np
 
 
+# ============================================================
+# LOAD IMAGE
+# ============================================================
+
 def load_image(path: str):
+
     image = cv2.imread(path)
 
     if image is None:
-        raise ValueError(f"Unable to read image: {path}")
+        raise ValueError(
+            f"Unable to read image: {path}"
+        )
 
     return image
 
+
+# ============================================================
+# GET LESION MASK
+# ============================================================
 
 def get_lesion_mask(image):
 
@@ -75,11 +86,20 @@ def get_lesion_mask(image):
     return lesion_mask
 
 
+# ============================================================
+# AREA
+# ============================================================
+
 def calculate_area(mask):
+
     return float(
         cv2.countNonZero(mask)
     )
 
+
+# ============================================================
+# DIAMETER
+# ============================================================
 
 def calculate_diameter(mask):
 
@@ -106,16 +126,28 @@ def calculate_diameter(mask):
     )
 
 
+# ============================================================
+# PERCENTAGE CHANGE
+# ============================================================
+
 def percentage_change(old, new):
 
     if old == 0:
         return 0.0
 
     return round(
-        ((new - old) / old) * 100,
+        (
+            (new - old)
+            /
+            old
+        ) * 100,
         2
     )
 
+
+# ============================================================
+# IOU
+# ============================================================
 
 def calculate_iou(mask1, mask2):
 
@@ -133,10 +165,16 @@ def calculate_iou(mask1, mask2):
         return 0.0
 
     return round(
-        float(intersection / union),
+        float(
+            intersection / union
+        ),
         4
     )
 
+
+# ============================================================
+# DICE
+# ============================================================
 
 def calculate_dice(mask1, mask2):
 
@@ -156,13 +194,22 @@ def calculate_dice(mask1, mask2):
 
     return round(
         float(
-            (2 * intersection) / total
+            (2 * intersection)
+            /
+            total
         ),
         4
     )
 
 
-def calculate_ssim(image1, image2):
+# ============================================================
+# SSIM-LIKE STRUCTURAL SIMILARITY
+# ============================================================
+
+def calculate_ssim(
+    image1,
+    image2
+):
 
     gray1 = cv2.cvtColor(
         image1,
@@ -184,8 +231,6 @@ def calculate_ssim(image1, image2):
         (224, 224)
     )
 
-    # Normalized correlation as a practical
-    # structural similarity indicator.
     score = cv2.matchTemplate(
         gray1,
         gray2,
@@ -193,10 +238,16 @@ def calculate_ssim(image1, image2):
     )[0][0]
 
     return round(
-        float(max(0, score)),
+        float(
+            max(0, score)
+        ),
         4
     )
 
+
+# ============================================================
+# EVOLUTION SCORE
+# ============================================================
 
 def calculate_evolution(
     area_change,
@@ -205,8 +256,13 @@ def calculate_evolution(
     ssim
 ):
 
-    growth = abs(area_change)
-    diameter_growth = abs(diameter_change)
+    growth = abs(
+        area_change
+    )
+
+    diameter_growth = abs(
+        diameter_change
+    )
 
     change_score = min(
         100,
@@ -222,10 +278,16 @@ def calculate_evolution(
     )
 
     return round(
-        float(change_score),
+        float(
+            change_score
+        ),
         2
     )
 
+
+# ============================================================
+# TEMPORAL ANALYSIS
+# ============================================================
 
 def analyze_temporal(
     previous_image_path: str,
@@ -250,6 +312,10 @@ def analyze_temporal(
         (224, 224)
     )
 
+    # --------------------------------------------------------
+    # MASKS
+    # --------------------------------------------------------
+
     previous_mask = get_lesion_mask(
         previous
     )
@@ -257,6 +323,10 @@ def analyze_temporal(
     current_mask = get_lesion_mask(
         current
     )
+
+    # --------------------------------------------------------
+    # AREA
+    # --------------------------------------------------------
 
     previous_area = calculate_area(
         previous_mask
@@ -266,6 +336,15 @@ def analyze_temporal(
         current_mask
     )
 
+    area_change = percentage_change(
+        previous_area,
+        current_area
+    )
+
+    # --------------------------------------------------------
+    # DIAMETER
+    # --------------------------------------------------------
+
     previous_diameter = calculate_diameter(
         previous_mask
     )
@@ -274,15 +353,14 @@ def analyze_temporal(
         current_mask
     )
 
-    area_change = percentage_change(
-        previous_area,
-        current_area
-    )
-
     diameter_change = percentage_change(
         previous_diameter,
         current_diameter
     )
+
+    # --------------------------------------------------------
+    # SIMILARITY
+    # --------------------------------------------------------
 
     dice = calculate_dice(
         previous_mask,
@@ -299,6 +377,10 @@ def analyze_temporal(
         current
     )
 
+    # --------------------------------------------------------
+    # EVOLUTION
+    # --------------------------------------------------------
+
     evolution = calculate_evolution(
         area_change,
         diameter_change,
@@ -306,38 +388,70 @@ def analyze_temporal(
         ssim
     )
 
+    # --------------------------------------------------------
+    # PROGRESSION
+    # --------------------------------------------------------
+
     if evolution < 25:
+
         progression = "Stable"
+
     elif evolution < 50:
+
         progression = "Moderate Change"
+
     else:
+
         progression = "Significant Change"
 
+    # --------------------------------------------------------
+    # RESULT
+    # --------------------------------------------------------
+
     return {
-        "previous_area": round(
-            previous_area,
-            2
-        ),
-        "current_area": round(
-            current_area,
-            2
-        ),
-        "area_change_percent": area_change,
 
-        "previous_diameter": round(
-            previous_diameter,
-            2
-        ),
-        "current_diameter": round(
-            current_diameter,
-            2
-        ),
-        "diameter_change_percent": diameter_change,
+        "previous_area":
+            round(
+                previous_area,
+                2
+            ),
 
-        "ssim": ssim,
-        "dice_coefficient": dice,
-        "iou": iou,
+        "current_area":
+            round(
+                current_area,
+                2
+            ),
 
-        "evolution_score": evolution,
-        "progression": progression
+        "area_change_percent":
+            area_change,
+
+        "previous_diameter":
+            round(
+                previous_diameter,
+                2
+            ),
+
+        "current_diameter":
+            round(
+                current_diameter,
+                2
+            ),
+
+        "diameter_change_percent":
+            diameter_change,
+
+        "ssim":
+            ssim,
+
+        "dice_coefficient":
+            dice,
+
+        "iou":
+            iou,
+
+        "evolution_score":
+            evolution,
+
+        "progression":
+            progression
     }

@@ -1,0 +1,52 @@
+{
+    "patient_id": 14,
+    "visit_id": 6,
+    "generated_at": "2026-08-13T18:45:17.903250",
+    "analysis": {
+        "prediction": {
+            "prediction": "mel",
+            "confidence": 0.9925
+        },
+        "segmentation": {
+            "mask_generated": true
+        },
+        "gradcam": {
+            "predicted_class": 4
+        },
+        "abcde": {
+            "A_asymmetry": 2.76,
+            "B_border": 45.41,
+            "C_color": 65.19,
+            "D_diameter": 53.19,
+            "E_evolution": {
+                "score": null,
+                "status": "Requires previous visit comparison"
+            },
+            "overall_score": 41.64,
+            "note": "ABCDE scores are image-analysis indicators and are not a clinical diagnosis. Evolution requires longitudinal visit comparison."
+        },
+        "temporal": {
+            "previous_area": 16837.0,
+            "current_area": 15941.0,
+            "area_change_percent": -5.32,
+            "previous_diameter": 166.0,
+            "current_diameter": 164.0,
+            "diameter_change_percent": -1.2,
+            "ssim": 0.6909,
+            "dice_coefficient": 0.7918,
+            "iou": 0.6553,
+            "evolution_score": 10.16,
+            "progression": "Stable"
+        },
+        "risk_assessment": {
+            "risk_score": 71.48,
+            "risk_level": "High"
+        },
+        "database": {
+            "image_id": 17,
+            "prediction_id": 10,
+            "abcde_id": 9,
+            "temporal_analysis_id": 4
+        }
+    }
+}

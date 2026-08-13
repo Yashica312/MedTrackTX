@@ -2,23 +2,17 @@ import { apiClient } from "./client";
 
 export interface Doctor {
   id: number;
-  name: string;
-  specialization: string;
-  phone: string;
+  full_name: string;
   email?: string;
 }
 
 export interface DoctorCreate {
-  name: string;
-  specialization: string;
-  phone: string;
+  full_name: string;
   email?: string;
 }
 
 export interface DoctorUpdate {
-  name?: string;
-  specialization?: string;
-  phone?: string;
+  full_name?: string;
   email?: string;
 }
 

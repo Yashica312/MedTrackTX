@@ -8,17 +8,20 @@ import {
   UserRound,
   X,
 } from "lucide-react";
+
 import {
   useCreatePatient,
   useDeletePatient,
   usePatients,
   useUpdatePatient,
 } from "../../hooks/usePatients";
+
 import type {
   Patient,
   PatientCreate,
   PatientUpdate,
 } from "../../api/patients";
+
 
 const EMPTY_FORM: PatientCreate = {
   full_name: "",
@@ -26,8 +29,8 @@ const EMPTY_FORM: PatientCreate = {
   gender: "",
   phone: "",
   email: "",
-  address: "",
 };
+
 
 function PatientModal({
   patient,
@@ -39,18 +42,20 @@ function PatientModal({
   const createMutation = useCreatePatient();
   const updateMutation = useUpdatePatient();
 
+  const editing = Boolean(patient);
+
   const [form, setForm] = useState<PatientCreate>({
     full_name: patient?.full_name ?? "",
     age: patient?.age ?? 0,
     gender: patient?.gender ?? "",
     phone: patient?.phone ?? "",
     email: patient?.email ?? "",
-    address: patient?.address ?? "",
   });
 
-  const editing = Boolean(patient);
   const loading =
-    createMutation.isPending || updateMutation.isPending;
+    createMutation.isPending ||
+    updateMutation.isPending;
+
 
   const updateField = (
     key: keyof PatientCreate,
@@ -62,146 +67,287 @@ function PatientModal({
     }));
   };
 
-  const submit = async (event: React.FormEvent) => {
+
+  const submit = async (
+    event: React.FormEvent
+  ) => {
     event.preventDefault();
 
-    if (!form.full_name.trim()) return;
-    if (!form.age || form.age < 0) return;
+    if (!form.full_name.trim()) {
+      return;
+    }
+
+    if (!form.age || form.age < 0) {
+      return;
+    }
+
+    if (!form.gender) {
+      return;
+    }
+
+    if (!form.phone.trim()) {
+      return;
+    }
+
 
     try {
+
       if (patient) {
+
         const payload: PatientUpdate = {
           full_name: form.full_name,
           age: form.age,
           gender: form.gender,
           phone: form.phone,
-          email: form.email,
-          address: form.address,
+          email: form.email || undefined,
         };
 
         await updateMutation.mutateAsync({
           patientId: patient.id,
           patient: payload,
         });
+
       } else {
-        await createMutation.mutateAsync(form);
+
+        await createMutation.mutateAsync({
+          full_name: form.full_name,
+          age: form.age,
+          gender: form.gender,
+          phone: form.phone,
+          email: form.email || undefined,
+        });
+
       }
 
       onClose();
+
     } catch {
-      // mutation error is already available from React Query
+      // React Query mutation state already contains the error.
     }
   };
 
+
   return (
-    <div className="modal-backdrop" onMouseDown={onClose}>
+    <div
+      className="modal-backdrop"
+      onMouseDown={onClose}
+    >
       <div
         className="modal-card patient-modal"
-        onMouseDown={(event) => event.stopPropagation()}
+        onMouseDown={(event) =>
+          event.stopPropagation()
+        }
       >
+
+        {/* HEADER */}
+
         <div className="modal-header">
+
           <div>
-            <span className="eyebrow">PATIENT MANAGEMENT</span>
-            <h2>{editing ? "Edit Patient" : "Add Patient"}</h2>
+
+            <span className="eyebrow">
+              PATIENT MANAGEMENT
+            </span>
+
+            <h2>
+              {editing
+                ? "Edit Patient"
+                : "Add Patient"}
+            </h2>
+
           </div>
+
 
           <button
             type="button"
             className="icon-button"
             onClick={onClose}
+            disabled={loading}
+            aria-label="Close"
           >
             <X size={18} />
           </button>
+
         </div>
 
+
+        {/* FORM */}
+
         <form onSubmit={submit}>
+
           <div className="form-grid">
+
+
+            {/* FULL NAME */}
+
             <label className="form-field form-field-wide">
-              <span>Full Name</span>
+
+              <span>
+                Full Name
+              </span>
+
               <input
                 value={form.full_name}
-                onChange={(e) =>
-                  updateField("full_name", e.target.value)
+                onChange={(event) =>
+                  updateField(
+                    "full_name",
+                    event.target.value
+                  )
                 }
                 placeholder="Enter patient name"
                 required
               />
+
             </label>
 
+
+            {/* AGE */}
+
             <label className="form-field">
-              <span>Age</span>
+
+              <span>
+                Age
+              </span>
+
               <input
                 type="number"
                 min="0"
                 value={form.age || ""}
-                onChange={(e) =>
-                  updateField("age", Number(e.target.value))
+                onChange={(event) =>
+                  updateField(
+                    "age",
+                    Number(event.target.value)
+                  )
                 }
                 placeholder="Age"
                 required
               />
+
             </label>
 
+
+            {/* GENDER */}
+
             <label className="form-field">
-              <span>Gender</span>
+
+              <span>
+                Gender
+              </span>
+
               <select
                 value={form.gender}
-                onChange={(e) =>
-                  updateField("gender", e.target.value)
+                onChange={(event) =>
+                  updateField(
+                    "gender",
+                    event.target.value
+                  )
                 }
                 required
               >
-                <option value="">Select gender</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Other</option>
+
+                <option value="">
+                  Select gender
+                </option>
+
+                <option value="Male">
+                  Male
+                </option>
+
+                <option value="Female">
+                  Female
+                </option>
+
+                <option value="Other">
+                  Other
+                </option>
+
               </select>
+
             </label>
 
+
+            {/* PHONE */}
+
             <label className="form-field">
-              <span>Phone</span>
+
+              <span>
+                Phone
+              </span>
+
               <input
                 value={form.phone}
-                onChange={(e) =>
-                  updateField("phone", e.target.value)
+                onChange={(event) =>
+                  updateField(
+                    "phone",
+                    event.target.value
+                  )
                 }
                 placeholder="Phone number"
+                required
               />
+
             </label>
 
+
+            {/* EMAIL */}
+
             <label className="form-field">
-              <span>Email</span>
+
+              <span>
+                Email
+              </span>
+
               <input
                 type="email"
                 value={form.email}
-                onChange={(e) =>
-                  updateField("email", e.target.value)
+                onChange={(event) =>
+                  updateField(
+                    "email",
+                    event.target.value
+                  )
                 }
                 placeholder="Email address"
               />
+
             </label>
 
-            <label className="form-field form-field-wide">
-              <span>Address</span>
-              <textarea
-                rows={3}
-                value={form.address}
-                onChange={(e) =>
-                  updateField("address", e.target.value)
-                }
-                placeholder="Patient address"
-              />
-            </label>
           </div>
 
-          {(createMutation.isError || updateMutation.isError) && (
+
+          {/* INFO */}
+
+          <div className="patient-assignment-note">
+
+            <UserRound size={16} />
+
+            <span>
+              This patient will be automatically
+              assigned to the currently logged-in doctor.
+            </span>
+
+          </div>
+
+
+          {/* ERROR */}
+
+          {(createMutation.isError ||
+            updateMutation.isError) && (
+
             <div className="form-error">
-              Unable to save patient. Please check the backend
+
+              Unable to save patient.
+              Please check the backend
               and try again.
+
             </div>
+
           )}
 
+
+          {/* FOOTER */}
+
           <div className="modal-footer">
+
             <button
               type="button"
               className="button-secondary"
@@ -211,134 +357,305 @@ function PatientModal({
               Cancel
             </button>
 
+
             <button
               type="submit"
               className="button-primary"
               disabled={loading}
             >
+
               {loading
                 ? "Saving..."
                 : editing
                 ? "Save Changes"
                 : "Add Patient"}
+
             </button>
+
           </div>
+
         </form>
+
       </div>
     </div>
   );
 }
 
+
 export default function PatientsPage() {
-  const { data: patients = [], isLoading, isError, refetch } =
-    usePatients();
 
-  const deleteMutation = useDeletePatient();
+  const {
+    data: patients = [],
+    isLoading,
+    isError,
+    refetch,
+  } = usePatients();
 
-  const [search, setSearch] = useState("");
-  const [modalOpen, setModalOpen] = useState(false);
+
+  const deleteMutation =
+    useDeletePatient();
+
+
+  const [search, setSearch] =
+    useState("");
+
+
+  const [modalOpen, setModalOpen] =
+    useState(false);
+
+
   const [editingPatient, setEditingPatient] =
     useState<Patient | null>(null);
 
+
+  // =========================================================
+  // SEARCH
+  // =========================================================
+
   const filteredPatients = useMemo(() => {
-    const query = search.trim().toLowerCase();
 
-    if (!query) return patients;
+    const query =
+      search.trim().toLowerCase();
 
-    return patients.filter((patient) => {
-      return [
-        patient.full_name,
-        patient.phone,
-        patient.email,
-        patient.gender,
-        String(patient.id),
-      ]
-        .filter(Boolean)
-        .some((value) =>
-          String(value).toLowerCase().includes(query)
-        );
-    });
-  }, [patients, search]);
 
-  const handleDelete = async (patient: Patient) => {
-    const confirmed = window.confirm(
-      `Delete patient "${patient.full_name}"?`
+    if (!query) {
+      return patients;
+    }
+
+
+    return patients.filter(
+      (patient) => {
+
+        return [
+          patient.full_name,
+          patient.phone,
+          patient.email,
+          patient.gender,
+          String(patient.id),
+        ]
+          .filter(Boolean)
+          .some((value) =>
+            String(value)
+              .toLowerCase()
+              .includes(query)
+          );
+
+      }
     );
 
-    if (!confirmed) return;
+  }, [patients, search]);
+
+
+  // =========================================================
+  // DELETE
+  // =========================================================
+
+  const handleDelete = async (
+    patient: Patient
+  ) => {
+
+    const confirmed =
+      window.confirm(
+        `Delete patient "${patient.full_name}"?`
+      );
+
+
+    if (!confirmed) {
+      return;
+    }
+
 
     try {
-      await deleteMutation.mutateAsync(patient.id);
+
+      await deleteMutation.mutateAsync(
+        patient.id
+      );
+
     } catch {
+
       window.alert(
         "Unable to delete patient. Please try again."
       );
+
     }
+
   };
+
+
+  // =========================================================
+  // ADD
+  // =========================================================
+
+  const handleAddPatient = () => {
+
+    setEditingPatient(null);
+
+    setModalOpen(true);
+
+  };
+
+
+  // =========================================================
+  // EDIT
+  // =========================================================
+
+  const handleEditPatient = (
+    patient: Patient
+  ) => {
+
+    setEditingPatient(patient);
+
+    setModalOpen(true);
+
+  };
+
+
+  // =========================================================
+  // VIEW
+  // =========================================================
+
+  const handleViewPatient = (
+    patientId: number
+  ) => {
+
+    window.location.href =
+      `/patients/${patientId}`;
+
+  };
+
+
+  // =========================================================
+  // PAGE
+  // =========================================================
 
   return (
     <section className="clinical-page">
+
+
+      {/* =====================================================
+          HEADER
+      ====================================================== */}
+
       <div className="clinical-page-header">
+
         <div>
+
           <div className="page-breadcrumb">
             Home / Patients
           </div>
 
-          <h1>Patients</h1>
+          <h1>
+            Patients
+          </h1>
 
           <p>
-            Patient roster, clinical details and follow-up
-            planning
+            Patient roster, clinical details
+            and follow-up planning
           </p>
+
         </div>
+
 
         <button
           type="button"
           className="button-primary"
-          onClick={() => {
-            setEditingPatient(null);
-            setModalOpen(true);
-          }}
+          onClick={handleAddPatient}
         >
+
           <Plus size={16} />
+
           Add Patient
+
         </button>
+
       </div>
 
+
+      {/* =====================================================
+          MAIN CARD
+      ====================================================== */}
+
       <div className="clinical-card">
+
+
+        {/* TOOLBAR */}
+
         <div className="toolbar">
+
           <div className="search-input">
+
             <Search size={16} />
+
             <input
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(event) =>
+                setSearch(event.target.value)
+              }
               placeholder="Search by name, patient ID, phone..."
             />
+
           </div>
+
 
           <div className="toolbar-meta">
-            {filteredPatients.length} patient
-            {filteredPatients.length !== 1 ? "s" : ""}
+
+            {filteredPatients.length}
+
+            {" "}
+
+            patient
+            {filteredPatients.length !== 1
+              ? "s"
+              : ""}
+
           </div>
+
         </div>
 
+
+        {/* ===================================================
+            LOADING
+        ==================================================== */}
+
         {isLoading ? (
+
           <div className="table-loading">
+
             <div className="loading-spinner" />
-            <span>Loading patient records...</span>
+
+            <span>
+              Loading patient records...
+            </span>
+
           </div>
+
+
         ) : isError ? (
+
+          /* =================================================
+             ERROR
+          ================================================== */
+
           <div className="table-state">
+
             <div className="state-icon danger">
+
               <UserRound size={20} />
+
             </div>
 
-            <h3>Unable to load patients</h3>
+
+            <h3>
+              Unable to load patients
+            </h3>
+
 
             <p>
-              The frontend could not retrieve patient records
-              from the FastAPI backend.
+              The frontend could not retrieve
+              patient records from the FastAPI
+              backend.
             </p>
+
 
             <button
               type="button"
@@ -347,118 +664,295 @@ export default function PatientsPage() {
             >
               Retry
             </button>
+
           </div>
+
+
         ) : filteredPatients.length === 0 ? (
+
+          /* =================================================
+             EMPTY
+          ================================================== */
+
           <div className="table-state">
+
             <div className="state-icon">
+
               <Search size={20} />
+
             </div>
 
-            <h3>No patients found</h3>
+
+            <h3>
+              {search
+                ? "No patients found"
+                : "No patients yet"}
+            </h3>
+
 
             <p>
-              No patient records match your current search.
+
+              {search
+                ? "No patient records match your current search."
+                : "Add your first patient to begin clinical monitoring."}
+
             </p>
+
+
+            {!search && (
+
+              <button
+                type="button"
+                className="button-primary"
+                onClick={handleAddPatient}
+              >
+
+                <Plus size={15} />
+
+                Add Patient
+
+              </button>
+
+            )}
+
           </div>
+
+
         ) : (
+
+          /* =================================================
+             TABLE
+          ================================================== */
+
           <div className="table-scroll">
+
             <table className="clinical-table">
+
               <thead>
+
                 <tr>
-                  <th>Patient ID</th>
-                  <th>Name</th>
-                  <th>Age</th>
-                  <th>Gender</th>
-                  <th>Phone</th>
-                  <th>Doctor ID</th>
-                  <th>Actions</th>
+
+                  <th>
+                    Patient ID
+                  </th>
+
+                  <th>
+                    Name
+                  </th>
+
+                  <th>
+                    Age
+                  </th>
+
+                  <th>
+                    Gender
+                  </th>
+
+                  <th>
+                    Phone
+                  </th>
+
+                  <th>
+                    Actions
+                  </th>
+
                 </tr>
+
               </thead>
 
+
               <tbody>
-                {filteredPatients.map((patient) => (
-                  <tr key={patient.id}>
-                    <td>
-                      <span className="record-id">
-                        PT-{String(patient.id).padStart(5, "0")}
-                      </span>
-                    </td>
 
-                    <td>
-                      <div className="record-person">
-                        <div className="record-avatar">
-                          {patient.full_name
-                            .charAt(0)
-                            .toUpperCase()}
+                {filteredPatients.map(
+                  (patient) => (
+
+                    <tr
+                      key={patient.id}
+                    >
+
+
+                      {/* PATIENT ID */}
+
+                      <td>
+
+                        <span className="record-id">
+
+                          PT-
+                          {String(
+                            patient.id
+                          ).padStart(
+                            5,
+                            "0"
+                          )}
+
+                        </span>
+
+                      </td>
+
+
+                      {/* NAME */}
+
+                      <td>
+
+                        <div className="record-person">
+
+                          <div className="record-avatar">
+
+                            {patient.full_name
+                              .charAt(0)
+                              .toUpperCase()}
+
+                          </div>
+
+
+                          <div>
+
+                            <strong>
+                              {patient.full_name}
+                            </strong>
+
+                            <span>
+                              {patient.email ||
+                                "No email provided"}
+                            </span>
+
+                          </div>
+
                         </div>
 
-                        <div>
-                          <strong>{patient.full_name}</strong>
-                          <span>{patient.email || "—"}</span>
+                      </td>
+
+
+                      {/* AGE */}
+
+                      <td>
+                        {patient.age}
+                      </td>
+
+
+                      {/* GENDER */}
+
+                      <td>
+
+                        <span className="gender-badge">
+
+                          {patient.gender ||
+                            "—"}
+
+                        </span>
+
+                      </td>
+
+
+                      {/* PHONE */}
+
+                      <td>
+                        {patient.phone ||
+                          "—"}
+                      </td>
+
+
+                      {/* ACTIONS */}
+
+                      <td>
+
+                        <div className="table-actions">
+
+
+                          {/* VIEW */}
+
+                          <button
+                            type="button"
+                            className="table-action"
+                            title="View patient"
+                            onClick={() =>
+                              handleViewPatient(
+                                patient.id
+                              )
+                            }
+                          >
+
+                            <Eye size={15} />
+
+                          </button>
+
+
+                          {/* EDIT */}
+
+                          <button
+                            type="button"
+                            className="table-action"
+                            title="Edit patient"
+                            onClick={() =>
+                              handleEditPatient(
+                                patient
+                              )
+                            }
+                          >
+
+                            <Edit3 size={15} />
+
+                          </button>
+
+
+                          {/* DELETE */}
+
+                          <button
+                            type="button"
+                            className="table-action danger"
+                            title="Delete patient"
+                            disabled={
+                              deleteMutation.isPending
+                            }
+                            onClick={() =>
+                              handleDelete(
+                                patient
+                              )
+                            }
+                          >
+
+                            <Trash2 size={15} />
+
+                          </button>
+
+
                         </div>
-                      </div>
-                    </td>
 
-                    <td>{patient.age}</td>
-                    <td>
-                      <span className="gender-badge">
-                        {patient.gender || "—"}
-                      </span>
-                    </td>
-                    <td>{patient.phone || "—"}</td>
-                    <td>{patient.doctor_id ?? "—"}</td>
+                      </td>
 
-                    <td>
-                      <div className="table-actions">
-                        <button
-                          type="button"
-                          className="table-action"
-                          title="View"
-                          onClick={() => {
-                            window.location.href =
-                              `/patients/${patient.id}`;
-                          }}
-                        >
-                          <Eye size={15} />
-                        </button>
+                    </tr>
 
-                        <button
-                          type="button"
-                          className="table-action"
-                          title="Edit"
-                          onClick={() => {
-                            setEditingPatient(patient);
-                            setModalOpen(true);
-                          }}
-                        >
-                          <Edit3 size={15} />
-                        </button>
+                  )
+                )}
 
-                        <button
-                          type="button"
-                          className="table-action danger"
-                          title="Delete"
-                          disabled={deleteMutation.isPending}
-                          onClick={() => handleDelete(patient)}
-                        >
-                          <Trash2 size={15} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
               </tbody>
+
             </table>
+
           </div>
+
         )}
+
       </div>
 
+
+      {/* =====================================================
+          MODAL
+      ====================================================== */}
+
       {modalOpen && (
+
         <PatientModal
-          patient={editingPatient}
-          onClose={() => setModalOpen(false)}
+          patient={
+            editingPatient
+          }
+          onClose={() =>
+            setModalOpen(false)
+          }
         />
+
       )}
+
     </section>
   );
 }

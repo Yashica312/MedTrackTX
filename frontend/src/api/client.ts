@@ -1,18 +1,22 @@
 import axios from "axios";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
-
-export const apiClient = axios.create({
-  baseURL: API_BASE_URL,
+const apiClient = axios.create({
+  baseURL:
+    import.meta.env.VITE_API_BASE_URL ||
+    "http://127.0.0.1:8000",
   headers: {
-    Accept: "application/json"
+    "Content-Type": "application/json",
   },
-  timeout: 30000
 });
 
 apiClient.interceptors.request.use(
   (config) => {
+    const token = localStorage.getItem("access_token");
+
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
     return config;
   },
   (error) => Promise.reject(error)
@@ -21,36 +25,22 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    console.error("API Error:", error.response?.data || error.message);
+    console.error(
+      "API Error:",
+      error.response?.data || error.message
+    );
+
+    if (error.response?.status === 401) {
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("doctor");
+
+      if (window.location.pathname !== "/login") {
+        window.location.href = "/login";
+      }
+    }
+
     return Promise.reject(error);
   }
 );
 
-export function getApiBaseUrl() {
-  return API_BASE_URL;
-}
-
-export function getUploadUrl(
-  uploadPath: string | null | undefined
-): string {
-  if (!uploadPath) return "";
-
-  if (
-    uploadPath.startsWith("http://") ||
-    uploadPath.startsWith("https://")
-  ) {
-    return uploadPath;
-  }
-
-  const normalized = uploadPath.replace(/\\/g, "/");
-
-  if (normalized.startsWith("/uploads/")) {
-    return `${API_BASE_URL}${normalized}`;
-  }
-
-  if (normalized.startsWith("uploads/")) {
-    return `${API_BASE_URL}/${normalized}`;
-  }
-
-  return `${API_BASE_URL}/${normalized.replace(/^\/+/, "")}`;
-}
+export { apiClient };

@@ -9,8 +9,13 @@ class PatientBase(BaseModel):
     email: EmailStr | None = None
 
 
-class PatientCreate(PatientBase):
-    doctor_id :int
+class PatientCreate(BaseModel):
+    full_name: str
+    age: int
+    gender: str
+    phone: str
+    email: str | None = None
+    address: str | None = None
 
 
 class PatientUpdate(BaseModel):

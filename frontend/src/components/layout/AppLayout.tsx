@@ -19,21 +19,13 @@ export default function AppLayout() {
         />
       )}
 
-      <div
-        className={`mobile-sidebar ${
-          mobileOpen ? "mobile-sidebar-open" : ""
-        }`}
-      >
-        <Sidebar />
-      </div>
-
       <div className="app-main">
-        <Header onMenuClick={() => setMobileOpen(true)} />
+        <Header
+          onMenuClick={() => setMobileOpen(true)}
+        />
 
-        <main className="page-container">
-          <div className="page-enter">
-            <Outlet />
-          </div>
+        <main className="app-content">
+          <Outlet />
         </main>
       </div>
     </div>

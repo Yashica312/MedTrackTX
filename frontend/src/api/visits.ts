@@ -3,33 +3,42 @@ import { apiClient } from "./client";
 export interface Visit {
   id: number;
   patient_id: number;
-  doctor_id: number;
   visit_date: string;
-  symptoms?: string;
-  notes?: string;
+  symptoms?: string | null;
+  doctor_notes?: string | null;
   created_at?: string;
 }
 
 export interface VisitCreate {
   patient_id: number;
-  doctor_id: number;
   visit_date: string;
   symptoms?: string;
-  notes?: string;
+  doctor_notes?: string;
 }
 
 export interface VisitUpdate {
-  patient_id?: number;
-  doctor_id?: number;
   visit_date?: string;
   symptoms?: string;
-  notes?: string;
+  doctor_notes?: string;
 }
 
+
+// ============================================================
+// GET ALL VISITS
+// ============================================================
+
 export async function fetchVisits(): Promise<Visit[]> {
-  const response = await apiClient.get<Visit[]>("/visits/");
+  const response = await apiClient.get<Visit[]>(
+    "/visits/"
+  );
+
   return response.data;
 }
+
+
+// ============================================================
+// GET SINGLE VISIT
+// ============================================================
 
 export async function fetchVisitById(
   visitId: number
@@ -41,6 +50,11 @@ export async function fetchVisitById(
   return response.data;
 }
 
+
+// ============================================================
+// CREATE VISIT
+// ============================================================
+
 export async function createVisit(
   visit: VisitCreate
 ): Promise<Visit> {
@@ -51,6 +65,11 @@ export async function createVisit(
 
   return response.data;
 }
+
+
+// ============================================================
+// UPDATE VISIT
+// ============================================================
 
 export async function updateVisit(
   visitId: number,
@@ -64,12 +83,20 @@ export async function updateVisit(
   return response.data;
 }
 
+
+// ============================================================
+// DELETE VISIT
+// ============================================================
+
 export async function deleteVisit(
   visitId: number
 ): Promise<{ message: string }> {
-  const response = await apiClient.delete<{ message: string }>(
-    `/visits/${visitId}`
-  );
+  const response =
+    await apiClient.delete<{
+      message: string;
+    }>(
+      `/visits/${visitId}`
+    );
 
   return response.data;
 }

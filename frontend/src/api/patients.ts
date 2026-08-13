@@ -7,8 +7,7 @@ export interface Patient {
   gender: string;
   phone: string;
   email?: string;
-  address?: string;
-  doctor_id?: number;
+  doctor_id: number;
 }
 
 export interface PatientCreate {
@@ -17,8 +16,6 @@ export interface PatientCreate {
   gender: string;
   phone: string;
   email?: string;
-  address?: string;
-  doctor_id?: number;
 }
 
 export interface PatientUpdate {
@@ -27,12 +24,13 @@ export interface PatientUpdate {
   gender?: string;
   phone?: string;
   email?: string;
-  address?: string;
-  doctor_id?: number;
 }
 
 export async function fetchPatients(): Promise<Patient[]> {
-  const response = await apiClient.get<Patient[]>("/patients/");
+  const response = await apiClient.get<Patient[]>(
+    "/patients/"
+  );
+
   return response.data;
 }
 
@@ -72,7 +70,9 @@ export async function updatePatient(
 export async function deletePatient(
   patientId: number
 ): Promise<{ message: string }> {
-  const response = await apiClient.delete<{ message: string }>(
+  const response = await apiClient.delete<{
+    message: string;
+  }>(
     `/patients/${patientId}`
   );
 
