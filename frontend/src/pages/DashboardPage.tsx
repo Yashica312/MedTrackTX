@@ -431,120 +431,100 @@ export default function Dashboard() {
             RISK DISTRIBUTION
         ==================================================== */}
 
-        <div className="dashboard-card risk-card">
-
+        <div
+          className="dashboard-card risk-card"
+          style={{ minHeight: "300px", overflow: "hidden" }}
+        >
           <div className="dashboard-card-header">
-
             <div>
-
-              <h2>
-                Risk Level Distribution
-              </h2>
-
-              <span>
-                Based on completed AI analyses
-              </span>
-
+              <h2>Risk Level Distribution</h2>
+              <span>Based on completed AI analyses</span>
             </div>
-
           </div>
 
-
           {totalAiAnalyses === 0 ? (
-
             <div className="analysis-empty-state">
-
               <div className="analysis-empty-icon">
                 <AlertTriangle size={22} />
               </div>
-
-              <strong>
-                No AI analyses yet
-              </strong>
-
+              <strong>No AI analyses yet</strong>
               <p>
-                Risk distribution will appear here
-                after lesion analysis is completed.
+                Risk distribution will appear here after lesion
+                analysis is completed.
               </p>
-
             </div>
-
           ) : (
-
-            <div className="risk-distribution">
-
-              {/* LOW */}
-
-              <div className="risk-row">
-
-                <div className="risk-row-label">
-
-                  <span className="risk-dot low" />
-
-                  <span>
-                    Low Risk
-                  </span>
-
+            <div
+              style={{
+                width: "100%",
+                boxSizing: "border-box",
+                padding: "24px",
+                display: "flex",
+                flexDirection: "column",
+                gap: "20px",
+              }}
+            >
+              <div
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  paddingBottom: "18px",
+                  borderBottom: "1px solid #edf2f7",
+                  boxSizing: "border-box",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <span style={{ width: "9px", height: "9px", minWidth: "9px", borderRadius: "50%", background: "#6b8e72", display: "inline-block" }} />
+                  <span style={{ fontSize: "13px", color: "#334155" }}>Low Risk</span>
                 </div>
-
-                <strong>
+                <strong style={{ fontSize: "18px", fontWeight: 700, color: "#17324d" }}>
                   {riskDistribution.low}
                 </strong>
-
               </div>
 
-
-              {/* MODERATE */}
-
-              <div className="risk-row">
-
-                <div className="risk-row-label">
-
-                  <span className="risk-dot moderate" />
-
-                  <span>
-                    Moderate Risk
-                  </span>
-
+              <div
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  paddingBottom: "18px",
+                  borderBottom: "1px solid #edf2f7",
+                  boxSizing: "border-box",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <span style={{ width: "9px", height: "9px", minWidth: "9px", borderRadius: "50%", background: "#b18b4d", display: "inline-block" }} />
+                  <span style={{ fontSize: "13px", color: "#334155" }}>Moderate Risk</span>
                 </div>
-
-                <strong>
+                <strong style={{ fontSize: "18px", fontWeight: 700, color: "#17324d" }}>
                   {riskDistribution.moderate}
                 </strong>
-
               </div>
 
-
-              {/* HIGH */}
-
-              <div className="risk-row">
-
-                <div className="risk-row-label">
-
-                  <span className="risk-dot high" />
-
-                  <span>
-                    High Risk
-                  </span>
-
+              <div
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  boxSizing: "border-box",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <span style={{ width: "9px", height: "9px", minWidth: "9px", borderRadius: "50%", background: "#a95b5b", display: "inline-block" }} />
+                  <span style={{ fontSize: "13px", color: "#334155" }}>High Risk</span>
                 </div>
-
-                <strong>
+                <strong style={{ fontSize: "18px", fontWeight: 700, color: "#17324d" }}>
                   {riskDistribution.high}
                 </strong>
-
               </div>
-
             </div>
-
           )}
-
         </div>
 
-
-        {/* ===================================================
-            RECENT CLINICAL ACTIVITY
-        ==================================================== */}
 
         <div className="dashboard-card recent-analysis-card">
 

@@ -14,6 +14,7 @@ import EditVisitPage from "../pages/visits/EditVisitPage";
 
 import AnalysisPage from "../pages/analysis/AnalysisPage";
 import ReportsPage from "../pages/ReportsPage";
+import SettingsPage from "../pages/SettingsPage";
 
 import ProtectedRoute from "./ProtectedRoute";
 
@@ -108,11 +109,7 @@ export default function AppRoutes() {
 
           <Route
             path="/doctors"
-            element={
-              <PlaceholderPage
-                title="Doctors"
-              />
-            }
+            element={<Dashboard />}
           />
 
 
@@ -120,31 +117,20 @@ export default function AppRoutes() {
               VISITS
           ================================================= */}
 
-          {/* Visit list */}
-
           <Route
             path="/visits"
             element={<VisitsPage />}
           />
-
-
-          {/* Create new visit */}
 
           <Route
             path="/visits/new"
             element={<NewVisitPage />}
           />
 
-
-          {/* View visit details */}
-
           <Route
             path="/visits/:visitId"
             element={<VisitDetailsPage />}
           />
-
-
-          {/* Edit visit */}
 
           <Route
             path="/visits/:visitId/edit"
@@ -192,11 +178,7 @@ export default function AppRoutes() {
 
           <Route
             path="/settings"
-            element={
-              <PlaceholderPage
-                title="Settings"
-              />
-            }
+            element={<SettingsPage />}
           />
 
 
