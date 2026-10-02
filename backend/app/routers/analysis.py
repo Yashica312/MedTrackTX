@@ -12,6 +12,10 @@ import os
 import tempfile
 
 from app.database import get_db
+from app.dependencies.auth import get_current_doctor
+
+from app.models.visit import Visit
+from app.models.patient import Patient
 
 from app.services.analysis_service import (
     analyze_patient_lesion
@@ -29,22 +33,53 @@ async def complete_analysis(
     visit_id: int,
     current_image: UploadFile = File(...),
     previous_image: UploadFile | None = File(None),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_doctor=Depends(get_current_doctor)
 ):
 
+    # Verify that the visit belongs to the logged-in doctor.
+    visit = (
+        db.query(Visit)
+        .join(Patient, Visit.patient_id == Patient.id)
+        .filter(
+            Visit.id == visit_id,
+            Patient.doctor_id == current_doctor.id
+        )
+        .first()
+    )
+
+    if not visit:
+        raise HTTPException(
+            status_code=404,
+            detail="Visit not found"
+        )
+
+    # Validate current image.
     if not current_image.content_type:
         raise HTTPException(
             status_code=400,
             detail="Current image is required."
         )
 
-    if not current_image.content_type.startswith(
-        "image/"
-    ):
+    if not current_image.content_type.startswith("image/"):
         raise HTTPException(
             status_code=400,
             detail="Current file must be an image."
         )
+
+    # Validate previous image if supplied.
+    if previous_image:
+        if not previous_image.content_type:
+            raise HTTPException(
+                status_code=400,
+                detail="Previous file must be an image."
+            )
+
+        if not previous_image.content_type.startswith("image/"):
+            raise HTTPException(
+                status_code=400,
+                detail="Previous file must be an image."
+            )
 
     current_path = None
     previous_path = None
@@ -66,20 +101,11 @@ async def complete_analysis(
                 await current_image.read()
             )
 
-
         # ================================================
         # PREVIOUS IMAGE
         # ================================================
 
         if previous_image:
-
-            if not previous_image.content_type.startswith(
-                "image/"
-            ):
-                raise HTTPException(
-                    status_code=400,
-                    detail="Previous file must be an image."
-                )
 
             with tempfile.NamedTemporaryFile(
                 delete=False,
@@ -92,7 +118,6 @@ async def complete_analysis(
                     await previous_image.read()
                 )
 
-
         # ================================================
         # COMPLETE AI + DB
         # ================================================
@@ -104,46 +129,37 @@ async def complete_analysis(
             previous_image_path=previous_path
         )
 
-
         return {
             "success": True,
             "visit_id": visit_id,
-            "current_filename":
-                current_image.filename,
-            "previous_filename":
+            "current_filename": current_image.filename,
+            "previous_filename": (
                 previous_image.filename
                 if previous_image
-                else None,
+                else None
+            ),
             "analysis": result
         }
-
 
     except HTTPException:
         raise
 
-
-    except Exception as e:
-
+    except Exception:
         db.rollback()
 
         raise HTTPException(
             status_code=500,
-            detail=f"Complete analysis failed: {str(e)}"
+            detail="Complete analysis failed."
         )
-
 
     finally:
 
         if current_path and os.path.exists(
             current_path
         ):
-            os.remove(
-                current_path
-            )
+            os.remove(current_path)
 
         if previous_path and os.path.exists(
             previous_path
         ):
-            os.remove(
-                previous_path
-            )
+            os.remove(previous_path)

@@ -70,3 +70,7 @@ reports/
 
 .DS_Store
 Thumbs.db
+# Backend runtime files
+backend/app/uploads/
+backend/gradcam_result.jpg
+backend/app/generated_reports/

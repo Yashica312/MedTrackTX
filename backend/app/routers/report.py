@@ -1,4 +1,5 @@
 from typing import List
+import os
 
 from fastapi import (
     APIRouter,
@@ -10,8 +11,11 @@ from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.dependencies.auth import get_current_doctor
 
 from app.models.report import Report
+from app.models.patient import Patient
+from app.models.visit import Visit
 
 from app.schemas.report import (
     ReportResponse,
@@ -38,11 +42,15 @@ router = APIRouter(
     response_model=List[ReportResponse]
 )
 def get_reports(
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_doctor=Depends(get_current_doctor)
 ):
-
     reports = (
         db.query(Report)
+        .join(Patient, Report.patient_id == Patient.id)
+        .filter(
+            Patient.doctor_id == current_doctor.id
+        )
         .order_by(
             Report.generated_at.desc()
         )
@@ -64,31 +72,48 @@ def generate_report(
     visit_id: int,
     request: ReportGenerateRequest,
     db: Session = Depends(get_db),
+    current_doctor=Depends(get_current_doctor)
 ):
+    # Verify that the visit belongs to the logged-in doctor.
+    visit = (
+        db.query(Visit)
+        .join(Patient, Visit.patient_id == Patient.id)
+        .filter(
+            Visit.id == visit_id,
+            Patient.doctor_id == current_doctor.id
+        )
+        .first()
+    )
+
+    if not visit:
+        raise HTTPException(
+            status_code=404,
+            detail="Visit not found"
+        )
+
+    # Do not trust an arbitrary patient_id supplied by the client.
+    if request.patient_id != visit.patient_id:
+        raise HTTPException(
+            status_code=400,
+            detail="Patient does not match the visit."
+        )
 
     try:
-
         report = generate_clinical_report(
             db=db,
-            patient_id=request.patient_id,
+            patient_id=visit.patient_id,
             visit_id=visit_id,
             analysis_data=request.analysis_data,
         )
 
         return report
 
-    except Exception as exc:
-
+    except Exception:
         db.rollback()
-
-        print(
-            "REPORT GENERATION ERROR:",
-            repr(exc)
-        )
 
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to generate report: {str(exc)}"
+            detail="Failed to generate report."
         )
 
 
@@ -102,19 +127,20 @@ def generate_report(
 )
 def get_report(
     report_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_doctor=Depends(get_current_doctor)
 ):
-
     report = (
         db.query(Report)
+        .join(Patient, Report.patient_id == Patient.id)
         .filter(
-            Report.id == report_id
+            Report.id == report_id,
+            Patient.doctor_id == current_doctor.id
         )
         .first()
     )
 
     if not report:
-
         raise HTTPException(
             status_code=404,
             detail="Report not found."
@@ -132,19 +158,20 @@ def get_report(
 )
 def get_report_pdf(
     report_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_doctor=Depends(get_current_doctor)
 ):
-
     report = (
         db.query(Report)
+        .join(Patient, Report.patient_id == Patient.id)
         .filter(
-            Report.id == report_id
+            Report.id == report_id,
+            Patient.doctor_id == current_doctor.id
         )
         .first()
     )
 
     if not report:
-
         raise HTTPException(
             status_code=404,
             detail="Report not found."
@@ -153,16 +180,12 @@ def get_report_pdf(
     pdf_path = report.report_path
 
     if not pdf_path:
-
         raise HTTPException(
             status_code=404,
             detail="PDF path is missing."
         )
 
-    if not __import__("os").path.isfile(
-        pdf_path
-    ):
-
+    if not os.path.isfile(pdf_path):
         raise HTTPException(
             status_code=404,
             detail="PDF file does not exist on server."
@@ -171,8 +194,6 @@ def get_report_pdf(
     return FileResponse(
         path=pdf_path,
         media_type="application/pdf",
-        filename=__import__("os").path.basename(
-            pdf_path
-        ),
+        filename=os.path.basename(pdf_path),
         content_disposition_type="inline",
     )

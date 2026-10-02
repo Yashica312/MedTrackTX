@@ -6,6 +6,7 @@ import Dashboard from "../pages/DashboardPage";
 import LoginPage from "../pages/LoginPage";
 
 import PatientsPage from "../pages/patients/PatientsPage";
+import DoctorsPage from "../pages/doctors/DoctorsPage";
 
 import VisitsPage from "../pages/visits/VisitsPage";
 import NewVisitPage from "../pages/visits/NewVisitPage";
@@ -109,7 +110,7 @@ export default function AppRoutes() {
 
           <Route
             path="/doctors"
-            element={<Dashboard />}
+            element={<DoctorsPage />}
           />
 
 
